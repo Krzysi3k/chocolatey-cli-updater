@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -45,15 +46,43 @@ func checkAppUpdates() []string {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	ignored := readIgnoredPackages()
 	var apps []string
 	output := string(out)
 	lines := strings.Split(output, "\n")
 	for _, v := range lines {
 		if strings.Contains(v, `|`) && !strings.Contains(v, "Output is package name") {
-			apps = append(apps, v)
+			if !isInSlice(v, ignored) {
+				apps = append(apps, v)
+			}
 		}
 	}
 	return apps
+}
+
+func readIgnoredPackages() []string {
+	ignoredLines := make([]string, 0, 10)
+	file, err := os.Open("ignored_packages.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		ignoredLines = append(ignoredLines, scanner.Text())
+	}
+	return ignoredLines
+}
+
+func isInSlice(line string, lines []string) bool {
+	for _, l := range lines {
+		if strings.Contains(line, l) {
+			return true
+		}
+	}
+	return false
 }
 
 func updateApps(apps []string) {
