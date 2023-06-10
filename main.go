@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -25,13 +26,20 @@ func main() {
 		StopColors:      []string{"fgGreen"},
 	}
 
+	ignoredFullPath := flag.String("d", "None", "directory path to ignored packages file")
+	flag.Parse()
+
 	spinner, err := yacspin.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	if *ignoredFullPath == "None" {
+		log.Fatal("please provide full path to ignored packages\n")
+	}
+
 	spinner.Start()
-	apps := checkAppUpdates()
+	apps := checkAppUpdates(ignoredFullPath)
 	spinner.Stop()
 	if apps == nil {
 		color.HiGreen("there is nothing to upgrade.")
@@ -40,14 +48,14 @@ func main() {
 	updateApps(apps)
 }
 
-func checkAppUpdates() []string {
+func checkAppUpdates(ignoredFullPath *string) []string {
 	cmd := exec.Command("choco", "outdated")
 	out, err := cmd.Output()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ignored := readIgnoredPackages()
+	ignored := readIgnoredPackages(ignoredFullPath)
 	var apps []string
 	output := string(out)
 	lines := strings.Split(output, "\n")
@@ -61,9 +69,9 @@ func checkAppUpdates() []string {
 	return apps
 }
 
-func readIgnoredPackages() []string {
+func readIgnoredPackages(ignoredFullPath *string) []string {
 	ignoredLines := make([]string, 0, 10)
-	file, err := os.Open("ignored_packages.txt")
+	file, err := os.Open(*ignoredFullPath)
 	if err != nil {
 		log.Fatal(err)
 	}
