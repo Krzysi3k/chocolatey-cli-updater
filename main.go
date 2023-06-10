@@ -15,31 +15,37 @@ import (
 	"github.com/theckman/yacspin"
 )
 
+var parser = struct {
+	ignoredPath *string
+	parse       func()
+}{
+	ignoredPath: flag.String("d", "None", "directory path to ignored packages file"),
+	parse:       flag.Parse,
+}
+
+var cfg = yacspin.Config{
+	Frequency:       100 * time.Millisecond,
+	CharSet:         yacspin.CharSets[11],
+	Suffix:          " choco",
+	SuffixAutoColon: true,
+	Message:         "checking new updates...",
+	StopCharacter:   "✓",
+	StopColors:      []string{"fgGreen"},
+}
+
 func main() {
-	cfg := yacspin.Config{
-		Frequency:       100 * time.Millisecond,
-		CharSet:         yacspin.CharSets[11],
-		Suffix:          " choco",
-		SuffixAutoColon: true,
-		Message:         "checking new updates...",
-		StopCharacter:   "✓",
-		StopColors:      []string{"fgGreen"},
-	}
-
-	ignoredFullPath := flag.String("d", "None", "directory path to ignored packages file")
-	flag.Parse()
-
 	spinner, err := yacspin.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if *ignoredFullPath == "None" {
+	parser.parse()
+	if *parser.ignoredPath == "None" {
 		log.Fatal("please provide full path to ignored packages\n")
 	}
 
 	spinner.Start()
-	apps := checkAppUpdates(ignoredFullPath)
+	apps := checkAppUpdates()
 	spinner.Stop()
 	if apps == nil {
 		color.HiGreen("there is nothing to upgrade.")
@@ -48,14 +54,14 @@ func main() {
 	updateApps(apps)
 }
 
-func checkAppUpdates(ignoredFullPath *string) []string {
+func checkAppUpdates() []string {
 	cmd := exec.Command("choco", "outdated")
 	out, err := cmd.Output()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ignored := readIgnoredPackages(ignoredFullPath)
+	ignored := readIgnoredPackages()
 	var apps []string
 	output := string(out)
 	lines := strings.Split(output, "\n")
@@ -69,9 +75,9 @@ func checkAppUpdates(ignoredFullPath *string) []string {
 	return apps
 }
 
-func readIgnoredPackages(ignoredFullPath *string) []string {
+func readIgnoredPackages() []string {
 	ignoredLines := make([]string, 0, 10)
-	file, err := os.Open(*ignoredFullPath)
+	file, err := os.Open(*parser.ignoredPath)
 	if err != nil {
 		log.Fatal(err)
 	}
