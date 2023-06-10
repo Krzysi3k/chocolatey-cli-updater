@@ -17,7 +17,7 @@ import (
 func main() {
 	cfg := yacspin.Config{
 		Frequency:       100 * time.Millisecond,
-		CharSet:         yacspin.CharSets[14],
+		CharSet:         yacspin.CharSets[11],
 		Suffix:          " choco",
 		SuffixAutoColon: true,
 		Message:         "checking new updates...",
