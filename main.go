@@ -76,7 +76,7 @@ func checkAppUpdates() []string {
 }
 
 func readIgnoredPackages() []string {
-	ignoredLines := make([]string, 0, 10)
+	ignoredLines := make([]string, 0, 50)
 	file, err := os.Open(*parser.ignoredPath)
 	if err != nil {
 		log.Fatal(err)
