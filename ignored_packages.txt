@@ -2,3 +2,4 @@ starship
 vim
 virtualbox
 cpu-z
+signal
