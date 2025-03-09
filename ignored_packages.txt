@@ -3,3 +3,6 @@ vim
 virtualbox
 cpu-z
 signal
+hugo-extended
+hugo
+obs-studio.install
