@@ -6,3 +6,5 @@ signal
 hugo-extended
 hugo
 obs-studio.install
+anydesk.install
+adobereader

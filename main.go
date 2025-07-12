@@ -66,7 +66,7 @@ func checkAppUpdates() []string {
 	output := string(out)
 	lines := strings.Split(output, "\n")
 	for _, v := range lines {
-		if strings.Contains(v, `|`) && !strings.Contains(v, "Output is package name") {
+		if strings.Contains(v, `|`) && !strings.Contains(v, "Output is package name") && !strings.Contains(v, "Output is Id") {
 			if !isInSlice(v, ignored) {
 				apps = append(apps, v)
 			}
